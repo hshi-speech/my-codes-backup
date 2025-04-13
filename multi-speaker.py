@@ -79,4 +79,30 @@ def count_negative_ones_per_row(tensor):
     return (tensor == -1).sum(dim=1).tolist()
 
 
+# ----------> CTC for two speakers
+    def _calc_ctc_loss(
+        self,
+        encoder_out_spk1: torch.Tensor,
+        encoder_out_spk2: torch.Tensor,
+        encoder_out_lens: torch.Tensor,
+        ys_spk1_pad: torch.Tensor,
+        ys_spk1_pad_lens: torch.Tensor,
+        ys_spk2_pad: torch.Tensor,
+        ys_spk2_pad_lens: torch.Tensor,
+    ):
+        # Calc CTC loss
+        loss_ctc1 = self.ctc_spk1(encoder_out_spk1, encoder_out_lens, ys_spk1_pad, ys_spk1_pad_lens)
+        loss_ctc2 = self.ctc_spk2(encoder_out_spk2, encoder_out_lens, ys_spk2_pad, ys_spk2_pad_lens)
+        loss_ctc = (loss_ctc1 + loss_ctc2) / 2
+
+        # Calc CER using CTC
+        cer_ctc = None
+        """
+        if not self.training and self.error_calculator is not None:
+            ys_hat = self.ctc.argmax(encoder_out).data
+            cer_ctc = self.error_calculator(ys_hat.cpu(), ys_pad.cpu(), is_ctc=True)
+        """
+        return loss_ctc, cer_ctc
+
+
 
