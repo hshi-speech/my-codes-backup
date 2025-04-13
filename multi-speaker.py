@@ -105,4 +105,17 @@ def count_negative_ones_per_row(tensor):
         return loss_ctc, cer_ctc
 
 
+# ----------> CTC for one speaker
+            log_probs = nn.functional.log_softmax(logits, dim=-1, dtype=torch.float32).transpose(0, 1)
+
+            with torch.backends.cudnn.flags(enabled=False):
+                loss = nn.functional.ctc_loss(
+                    log_probs,
+                    flattened_targets,
+                    input_lengths,
+                    target_lengths,
+                    blank=self.config.pad_token_id,
+                    reduction=self.config.ctc_loss_reduction,
+                    zero_infinity=self.config.ctc_zero_infinity,
+                )
 
